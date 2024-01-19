@@ -1075,7 +1075,7 @@ function needUpdate() {
 
 function output($body, $statusCode = 200, $headers = ['Content-Type' => 'text/html'], $isBase64Encoded = false) {
     if (isset($_SERVER['Set-Cookie'])) $headers['Set-Cookie'] = $_SERVER['Set-Cookie'];
-    if (baseclassofdrive() == 'Aliyundrive' || baseclassofdrive() == 'BaiduDisk') $headers['Referrer-Policy'] = 'no-referrer';
+    if (baseclassofdrive() == 'Aliyundrive' || baseclassofdrive() == 'AliyundriveOpen' || baseclassofdrive() == 'BaiduDisk') $headers['Referrer-Policy'] = 'no-referrer';
     //$headers['Referrer-Policy'] = 'same-origin';
     //$headers['X-Frame-Options'] = 'sameorigin';
     return [
@@ -1361,7 +1361,8 @@ function EnvOpt($needUpdate = 0) {
     global $drive;
     global $platform;
     ksort($EnvConfigs);
-    $disktags = explode('|', getConfig('disktag'));
+    $disktag_s = getConfig('disktag');
+    $disktags = explode('|', $disktag_s);
     $envs = '';
     //foreach ($EnvConfigs as $env => $v) if (isCommonEnv($env)) $envs .= '\'' . $env . '\', ';
     $envs = substr(json_encode(array_keys($EnvConfigs)), 1, -1);
@@ -1439,11 +1440,12 @@ function EnvOpt($needUpdate = 0) {
         if ($_POST['pass'] == sha1(getConfig('admin') . $_POST['timestamp'])) {
             if ($_POST['config_b'] == 'export') {
                 foreach ($EnvConfigs as $env => $v) {
-                    if (isCommonEnv($env)) {
+                    if (isCommonEnv($env) && isShowedEnv($env)) {
                         $value = getConfig($env);
                         if ($value) $tmp[$env] = $value;
                     }
                 }
+                if ($disktag_s) $tmp["disktag"] = $disktag_s;
                 foreach ($disktags as $disktag) {
                     $d = getConfig($disktag);
                     if ($d == '') {
