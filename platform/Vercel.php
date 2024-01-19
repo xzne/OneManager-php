@@ -311,17 +311,18 @@ function VercelUpdate($appId, $token, $sourcePath = "") {
     $url = "https://api.vercel.com/v13/deployments";
     $header["Authorization"] = "Bearer " . $token;
     $header["Content-Type"] = "application/json";
-    $data["name"] = "OneManager";
-    $data["project"] = $appId;
-    $data["target"] = "production";
     $data["functions"]["api/index.php"]["runtime"] = "vercel-php@" . $vercelPHPversion;
     $data["routes"][0]["src"] = "/(.*)";
     $data["routes"][0]["dest"] = "/api/index.php";
+    $verceljson = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES);
+    $data["name"] = "OneManager";
+    $data["project"] = $appId;
+    $data["target"] = "production";
     if ($sourcePath == "") $sourcePath = splitlast(splitlast(__DIR__, "/")[0], "/")[0];
     //echo $sourcePath . "<br>";
     getEachFiles($file, $sourcePath);
     $tmp['file'] = "vercel.json";
-    $tmp['data'] = '{ "functions": { "api/index.php": { "runtime": "vercel-php@' . $vercelPHPversion . '" } }, "routes": [ { "src": "/(.*)",  "dest": "/api/index.php" } ] }';
+    $tmp['data'] = $verceljson;
     $file[] = $tmp;
     $data["files"] = $file;
 
