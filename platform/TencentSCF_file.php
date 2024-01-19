@@ -137,6 +137,7 @@ function setConfig($arr, $disktag = '') {
             $envs[$arr['disktag_rename']] = '';
         } else {
             $disktags = array_unique($disktags);
+            $disktag_s = "";
             foreach ($disktags as $disktag) if ($disktag != '') $disktag_s .= $disktag . '|';
             if ($disktag_s != '') $envs['disktag'] = substr($disktag_s, 0, -1);
             else $envs['disktag'] = '';
@@ -174,7 +175,7 @@ function install() {
             var expires = "expires="+expd.toGMTString();
             document.cookie=\'language=; path=/; \'+expires;
         </script>
-        <meta http-equiv="refresh" content="3;URL=' . $url . '">', 'Program updating', 201, 1);
+        <meta http-equiv="refresh" content="3;URL=">', 'Program updating', 201, 1);
         }
         return message(getconstStr('Success') . '
     <script>
@@ -211,7 +212,7 @@ function install() {
                 $title = 'Reinstall';
                 return message($html, $title, 201, 1);
             }
-            $html .= '
+            $html = '
     <form action="?install2" method="post" onsubmit="return notnull(this);">
         <label>' . getconstStr('SetAdminPassword') . ':<input name="admin" type="password" placeholder="' . getconstStr('EnvironmentsDescription')['admin'] . '" size="' . strlen(getconstStr('EnvironmentsDescription')['admin']) . '"></label><br>
         <input type="submit" value="' . getconstStr('Submit') . '">
@@ -231,7 +232,7 @@ function install() {
         }
     }
     if ($_GET['install0']) {
-        $html .= '
+        $html = '
     <form action="?install1" method="post" onsubmit="return notnull(this);">
 language:<br>';
         foreach ($constStr['languages'] as $key1 => $value1) {
@@ -283,7 +284,7 @@ language:<br>';
         $title = getconstStr('SelectLanguage');
         return message($html, $title, 201);
     }
-    $html .= '<a href="?install0">' . getconstStr('ClickInstall') . '</a>, ' . getconstStr('LogintoBind');
+    $html = '<a href="?install0">' . getconstStr('ClickInstall') . '</a>, ' . getconstStr('LogintoBind');
     $title = 'Install';
     return message($html, $title, 201);
 }
@@ -404,10 +405,7 @@ function updateEnvironment($Envs, $function_name, $Region, $Namespace, $SecretId
     //    $zip->close(); //关闭处理的zip文件
     //}
 
-    return updateProgram($function_name, $Region, $namespace, $SecretId, $SecretKey, $source);
-    $tmp1['Response']['Error']['Message'] = $codeurl;
-    error_log1($tmp1['Response']['Error']['Message']);
-    return json_encode($tmp1);
+    return updateProgram($function_name, $Region, $Namespace, $SecretId, $SecretKey, $source);
 }
 
 function SetbaseConfig($Envs, $function_name, $Region, $Namespace, $SecretId, $SecretKey) {
@@ -645,6 +643,7 @@ function changeAuthKey() {
             $title = 'Error';
             return message($html, $title, 400);
         } else {
+            $title = "Success";
             $html = getconstStr('Success') . '
     <script>
         var status = "' . $response['DplStatus'] . '";
