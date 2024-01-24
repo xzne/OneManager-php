@@ -159,7 +159,6 @@ function install() {
         }
         if (needUpdate()) {
             OnekeyUpate();
-            $url = "";
             return message('update to github version, reinstall.
     <script>
         var expd = new Date();
@@ -167,7 +166,7 @@ function install() {
         var expires = "expires="+expd.toGMTString();
         document.cookie=\'language=; path=/; \'+expires;
     </script>
-    <meta http-equiv="refresh" content="3;URL=' . $url . '">', 'Program updating', 201);
+    <meta http-equiv="refresh" content="3;URL=">', 'Program updating', 201);
         }
         return output('Jump
     <script>
@@ -281,8 +280,7 @@ function FCAPI2016($config, $Method, $data = '') {
     $AccessKeySecret = $config['AccessKeySecret'];
 
     $host = $accountId . '.' . $region . '-internal.fc.aliyuncs.com';
-    //$path = '/2016-08-15/services/' . $service_name . '/functions/' . $function_name;
-    $path = '/2021-04-06/services/' . $service_name . '/functions/' . $function_name;
+    $path = '/2016-08-15/services/' . $service_name . '/functions/' . $function_name;
     $url = 'https://' . $host . $path;
 
     $ContentMd5 = '';
@@ -371,6 +369,7 @@ function SetbaseConfig($Envs, $accountId, $region, $service_name, $function_name
     $tmpdata['description'] = 'Onedrive index and manager in Aliyun FC.';
     $tmpdata['memorySize'] = 128;
     $tmpdata['cpu'] = 0.1;
+    $tmpdata['diskSize'] = 512;
     $tmpdata['timeout'] = 30;
     $tmpdata['environmentVariables'] = $tmp_env;
 
