@@ -281,7 +281,8 @@ function FCAPI2016($config, $Method, $data = '') {
     $AccessKeySecret = $config['AccessKeySecret'];
 
     $host = $accountId . '.' . $region . '-internal.fc.aliyuncs.com';
-    $path = '/2016-08-15/services/' . $service_name . '/functions/' . $function_name;
+    //$path = '/2016-08-15/services/' . $service_name . '/functions/' . $function_name;
+    $path = '/2021-04-06/services/' . $service_name . '/functions/' . $function_name;
     $url = 'https://' . $host . $path;
 
     $ContentMd5 = '';
@@ -369,6 +370,7 @@ function SetbaseConfig($Envs, $accountId, $region, $service_name, $function_name
 
     $tmpdata['description'] = 'Onedrive index and manager in Aliyun FC.';
     $tmpdata['memorySize'] = 128;
+    $tmpdata['cpu'] = 0.1;
     $tmpdata['timeout'] = 30;
     $tmpdata['environmentVariables'] = $tmp_env;
 
