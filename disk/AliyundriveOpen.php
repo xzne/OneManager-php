@@ -1028,6 +1028,8 @@ class AliyundriveOpen {
                 $url = $this->oauth_url;
             } else {
                 $url = $this->my_oauth_url;
+                $tmp = no_return_curl('GET', $url);
+                if ($tmp['stat'] == 0) return false;
             }
             $response = null;
             while ($response['stat'] == 0 && $p < 3) {
