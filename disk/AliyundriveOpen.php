@@ -1022,8 +1022,7 @@ class AliyundriveOpen {
             error_log1('[' . $this->disktag . '] Get access token:' . json_encode($tmp, JSON_PRETTY_PRINT));
             $this->access_token = $ret['access_token'];
             savecache('access_token', $this->access_token, $this->disktag, $ret['expires_in'] - 300);
-            //if (time() > getConfig('token_expires', $this->disktag)) 
-            setConfig(['refresh_token' => $ret['refresh_token'], 'token_expires' => time() + 3 * 24 * 60 * 60], $this->disktag);
+            if (time() > getConfig('token_expires', $this->disktag)) setConfig(['refresh_token' => $ret['refresh_token'], 'token_expires' => time() + 3 * 24 * 60 * 60], $this->disktag);
             return true;
         }
         return true;
