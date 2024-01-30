@@ -805,7 +805,7 @@ class AliyundriveOpen {
     </form>
 </div>
 <script>
-    var status = "' . $response['DplStatus'] . '";
+    var status = "' . $result['DplStatus'] . '";
     function notnull(t)
     {
         if (t.driveId.value==\'\') {
