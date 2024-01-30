@@ -805,7 +805,6 @@ class AliyundriveOpen {
     </form>
 </div>
 <script>
-    var status = "' . $result['DplStatus'] . '";
     function notnull(t)
     {
         if (t.driveId.value==\'\') {
@@ -816,7 +815,7 @@ class AliyundriveOpen {
     }
 </script>
     ';
-                return message($html, $title, 201, 1);
+                return message($html, $title, 201);
             } else {
                 return message('<pre>' . json_encode(json_decode($res['body']), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</pre>', $res['stat']);
             }
