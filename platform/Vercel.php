@@ -425,7 +425,7 @@ function OnekeyUpate($GitSource = 'Github', $auth = 'qkqpttgf', $project = 'OneM
 function WaitFunction($deployid = '') {
     if ($deployid == '1') {
         $tmp['stat'] = 400;
-        $tmp['body'] = 'id must provided.';
+        $tmp['body'] = 'deployID must provided.';
         return $tmp;
     }
     $token = getConfig('APIKey');
