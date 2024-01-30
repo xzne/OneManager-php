@@ -7,6 +7,7 @@ class AliyundriveOpen {
     protected $client_id;
     protected $client_secret;
     protected $oauth_url;
+    protected $my_oauth_url;
     protected $scope;
     protected $redirect_uri;
     protected $api_url;
@@ -18,8 +19,10 @@ class AliyundriveOpen {
     function __construct($tag) {
         $this->disktag = $tag;
         $this->client_id = getConfig('client_id', $tag);
+        if ($this->client_id == "") $this->client_id = "4685bbf979d44b138fbba410de99dfe4";
         $this->client_secret = getConfig('client_secret', $tag);
         $this->oauth_url = 'https://openapi.alipan.com/oauth/';
+        $this->my_oauth_url = 'https://aliyunopenaccesstoken.onemanager.eu.org/';
         $this->scope = 'user:base,file:all:read,file:all:write';
         $this->redirect_uri = 'https://scfonedrive.github.io';
         //$this->redirect_uri = 'localhost';
@@ -785,7 +788,7 @@ class AliyundriveOpen {
 <div>
     <form action="?Finish&disktag=' . $_GET['disktag'] . '&AddDisk=' . get_class($this) . '" method="post" onsubmit="return notnull(this);">
         <label><input type="radio" name="driveId" value="' . $result['default_drive_id'] . '"' . ($result['default_drive_id'] == $this->driveId ? ' checked' : '') . '>' . '用普通空间 ' . getconstStr(' ') . '</label><br>
-        <label><input type="radio" name="driveId" value="' . $result['default_sbox_drive_id'] . '"' . ($result['default_sbox_drive_id'] == $this->driveId ? ' checked' : '') . '>' . '用虎符文件保险箱 </label><br>
+        <label><input type="radio" name="driveId" value="' . $result['resource_drive_id'] . '"' . ($result['resource_drive_id'] == $this->driveId ? ' checked' : '') . '>' . '用资源库 </label><br>
         <input type="submit" value="' . getconstStr('Submit') . '">
     </form>
 </div>
@@ -807,11 +810,15 @@ class AliyundriveOpen {
             }
         }
         if (isset($_GET['install1']) && isset($_GET['code'])) {
-            $data['client_id'] = $this->client_id;
-            $data['client_secret'] = $this->client_secret;
             $data['grant_type'] = 'authorization_code';
             $data['code'] = $_GET['code'];
-            $tmp = curl('POST', $this->oauth_url . 'access_token',  json_encode($data), ["Content-type" => "application/json"]);
+            if ($this->client_id != "" && $this->client_secret != "") {
+                $data['client_id'] = $this->client_id;
+                $data['client_secret'] = $this->client_secret;
+                $tmp = curl('POST', $this->oauth_url . 'access_token',  json_encode($data), ["Content-type" => "application/json"]);
+            } else {
+                $tmp = curl('POST', $this->my_oauth_url . 'access_token',  json_encode($data), ["Content-type" => "application/json"]);
+            }
             //error_log(json_encode($tmp));
             if ($tmp['stat'] == 200) $ret = json_decode($tmp['body'], true);
             if (isset($ret['refresh_token'])) {
@@ -852,10 +859,10 @@ class AliyundriveOpen {
                     return message($html, getconstStr('Wait') . ' 3s', 201, 1);
                 }
             } else {
-                return message('<pre>' . json_encode(json_decode($tmp['body']), JSON_PRETTY_PRINT) . '</pre>', $tmp['stat']);
+                return message($tmp['body'], $tmp['stat']);
             }
         }
-        if (isset($_GET['install0']) && $_POST['disktag_add'] != '' && $_POST['client_id'] != '' && $_POST['client_secret'] != '') {
+        if (isset($_GET['install0']) && $_POST['disktag_add'] != '') {
             $_POST['disktag_add'] = preg_replace('/[^0-9a-zA-Z|_]/i', '', $_POST['disktag_add']);
             $f = substr($_POST['disktag_add'], 0, 1);
             if (strlen($_POST['disktag_add']) == 1) $_POST['disktag_add'] .= '_';
@@ -876,15 +883,16 @@ class AliyundriveOpen {
                 document.cookie=\'disktag=; path=/; \'+expires;
                 </script>', 'Error', 201);
             }
-
             $tmp = null;
             foreach ($EnvConfigs as $env => $v) if (isInnerEnv($env)) $tmp[$env] = '';
 
             $tmp['Driver'] = get_class($this);
             $tmp['disktag_add'] = $_POST['disktag_add'];
             $tmp['diskname'] = $_POST['diskname'];
-            $tmp['client_id'] = $_POST['client_id'];
-            $tmp['client_secret'] = $_POST['client_secret'];
+            if ($_POST['Drive_custom'] == 'on' && $_POST['client_id'] != '' && $_POST['client_secret'] != '') {
+                $tmp['client_id'] = $_POST['client_id'];
+                $tmp['client_secret'] = $_POST['client_secret'];
+            }
             //error_log(json_encode($tmp));
 
             $response = setConfigResponse(setConfig($tmp, $this->disktag));
@@ -893,15 +901,20 @@ class AliyundriveOpen {
                 $title = 'Error';
                 return message($html, $title, 400);
             } else {
+                if ($_POST['Drive_custom'] == 'on' && $_POST['client_id'] != '' && $_POST['client_secret'] != '') {
+                    $client_id1 = $_POST['client_id'];
+                } else {
+                    $client_id1 = $this->client_id;
+                }
                 $title = getconstStr('MayinEnv');
                 $html = getconstStr('Wait');
                 $html .= '
     <a href="" id="a1">跳转去登录并授权</a>
     <script>
-        url=location.protocol + "//" + location.host + "' . $url . '?install1&disktag=' . $this->disktag . '&AddDisk=' . get_class($this) . '";
-        url="' . $this->oauth_url . 'authorize?client_id=' . $_POST['client_id'] . '&redirect_uri=' . $this->redirect_uri . '&scope=' . $this->scope . '&response_type=code&state=' . '" + window.btoa(url);
+        url = location.protocol + "//" + location.host + "' . $url . '?install1&disktag=' . $this->disktag . '&AddDisk=' . get_class($this) . '";
+        url="' . $this->oauth_url . 'authorize?client_id=' . $client_id1 . '&redirect_uri=' . $this->redirect_uri . '&scope=' . $this->scope . '&response_type=code&state=' . '" + window.btoa(url);
         document.getElementById(\'a1\').href=url;
-        //window.open(url,"_blank");
+        //window.open(url, "_blank");
         location.href = url;
     </script>
     ';
@@ -917,29 +930,36 @@ class AliyundriveOpen {
         ' . getconstStr('DiskName') . ':
         <input type="text" name="diskname" placeholder="' . getconstStr('EnvironmentsDescription')['diskname'] . '" style="width:100%"><br>
         <br>
-        没写完，文件只能预览或下载，不能重命名删除等。
-        <div style="margin:10px 35px">
-            授权回调URL:<br>' . $this->redirect_uri . '<br>
-            App ID:<input type="text" name="client_id" style="width:100%" placeholder=""><br>
-            App Secret:<input type="text" name="client_secret" style="width:100%"><br>
-        </div>
+        <div id="NT_custom">
+            <label><input type="checkbox" name="Drive_custom" onclick="document.getElementById(\'custom_app\').style.display=(this.checked?\'\':\'none\');">' . getconstStr('CustomIdSecret') . '</label><br>
+            <div id="custom_app" style="display:none;margin:10px 35px">
+                <a href="https://www.aliyundrive.com/developer/f" target="_blank">申请、创建应用</a><br>
+                App ID:<input type="text" name="client_id" style="width:100%" placeholder=""><br>
+                App Secret:<input type="text" name="client_secret" style="width:100%"><br>
+                授权回调URL:<br>' . $this->redirect_uri . '<br>
+            </div>
+        </div><br>';
+        if ($_SERVER['language'] == 'zh-cn') $html .= '你要理解 scfonedrive.github.io 是github上的静态网站，<br><font color="red">除非github真的挂掉</font>了，<br>不然，稍后你如果<font color="red">连不上</font>，请检查你的运营商或其它“你懂的”问题！<br>';
+        $html .= '
+        <br><font color="red">没写完，文件只能预览或下载，</font>不能重命名删除等。<br>
         <input type="submit" value="' . getconstStr('Submit') . '">
     </form>
 </div>
     <script>
-        function notnull(t)
-        {
+        function notnull(t) {
             if (t.disktag_add.value==\'\') {
                 alert(\'' . getconstStr('DiskTag') . '\');
                 return false;
             }
-            if (t.client_id.value==\'\') {
-                alert(\'请输入App ID\');
-                return false;
-            }
-            if (t.client_secret.value==\'\') {
-                alert(\'请输入App Secret\');
-                return false;
+            if (t.Drive_custom.checked) {
+                if (t.client_id.value==\'\') {
+                    alert(\'请输入App ID\');
+                    return false;
+                }
+                if (t.client_secret.value==\'\') {
+                    alert(\'请输入App Secret\');
+                    return false;
+                }
             }
             envs = [' . $envs . '];
             if (envs.indexOf(t.disktag_add.value)>-1) {
@@ -972,13 +992,19 @@ class AliyundriveOpen {
         }
         if (!($this->access_token = getcache('access_token', $this->disktag))) {
             $p = 0;
-            $tmp1['client_id'] = $this->client_id;
-            $tmp1['client_secret'] = $this->client_secret;
+            $url = "";
             $tmp1['grant_type'] = 'refresh_token';
             $tmp1['refresh_token'] = $refresh_token;
+            if ($this->client_id != "" && $this->client_secret != "") {
+                $tmp1['client_id'] = $this->client_id;
+                $tmp1['client_secret'] = $this->client_secret;
+                $url = $this->oauth_url;
+            } else {
+                $url = $this->my_oauth_url;
+            }
             $response = null;
             while ($response['stat'] == 0 && $p < 3) {
-                $response = curl('POST', $this->oauth_url . "access_token", json_encode($tmp1), ["Content-Type" => "application/json"]);
+                $response = curl('POST', $url . "access_token", json_encode($tmp1), ["Content-Type" => "application/json"]);
                 $p++;
             }
             //error_log1(json_encode($response));
