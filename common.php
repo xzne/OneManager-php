@@ -574,19 +574,6 @@ function isreferhost() {
     return false;
 }
 
-function no_return_curl($method, $url, $data = '') {
-    $ch = curl_init();
-    curl_setopt($ch, CURLOPT_URL, $url);
-    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
-    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
-    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-    curl_setopt($ch, CURLOPT_TIMEOUT, 1);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-    curl_exec($ch);
-    curl_close($ch);
-}
-
 function adminpass2cookie($name, $pass, $timestamp) {
     return md5($name . ':' . md5($pass) . '@' . $timestamp) . "(" . $timestamp . ")";
 }
@@ -854,6 +841,20 @@ function array_value_isnot_null($arr) {
     return $arr !== '';
 }
 
+function no_return_curl($method, $url, $data = '') {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 1);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+    $response['body'] = curl_exec($ch);
+    $response['stat'] = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    return $response;
+}
 function curl($method, $url, $data = '', $headers = [], $returnheader = 0, $location = 0) {
     //if (!isset($headers['Accept'])) $headers['Accept'] = '*/*';
     //if (!isset($headers['Referer'])) $headers['Referer'] = $url;
@@ -2507,6 +2508,7 @@ function render_list($path = '', $files = []) {
         }
         if ($_SERVER['is_guestup_path'] || ($_SERVER['admin'] && $files['type'] == 'folder' && $_SERVER['ishidden'] < 4)) {
             $now_driver = baseclassofdrive();
+            if ($now_driver == "AliyundriveOpen") $now_driver = "Aliyundrive";
             if ($now_driver) {
                 while (strpos($html, '<!--UploadJsStart-->')) $html = str_replace('<!--UploadJsStart-->', '', $html);
                 while (strpos($html, '<!--UploadJsEnd-->')) $html = str_replace('<!--UploadJsEnd-->', '', $html);
