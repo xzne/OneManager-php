@@ -828,7 +828,7 @@ class AliyundriveOpen {
                 $data['client_secret'] = $this->client_secret;
                 $tmp = curl('POST', $this->oauth_url . 'access_token',  json_encode($data), ["Content-type" => "application/json"]);
             } else {
-                $tmp = no_return_curl('GET', $this->my_oauth_url);
+                $tmp = no_return_curl('GET', $this->my_oauth_url . "test");
                 if ($tmp['stat'] != 0) {
                     $tmp = curl('POST', $this->my_oauth_url . 'access_token',  json_encode($data), ["Content-type" => "application/json"]);
                 } else {
@@ -1028,7 +1028,7 @@ class AliyundriveOpen {
                 $url = $this->oauth_url;
             } else {
                 $url = $this->my_oauth_url;
-                $tmp = no_return_curl('GET', $url);
+                $tmp = no_return_curl('GET', $url . "test");
                 if ($tmp['stat'] == 0) return false;
             }
             $response = null;
