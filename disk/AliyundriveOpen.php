@@ -18,11 +18,8 @@ class AliyundriveOpen extends Aliyundrive {
         $this->my_oauth_url = 'https://aliyunopenaccesstoken.onemanager.eu.org/';
         $this->scope = 'user:base,file:all:read,file:all:write';
         $this->redirect_uri = 'https://scfonedrive.github.io';
-        //$this->redirect_uri = 'localhost';
         $this->api_url = 'https://openapi.alipan.com/adrive/v1.0/';
-        //$this->api_url_v3 = 'https://api.aliyundrive.com/adrive/v3';
         $this->driveId = getConfig('driveId', $tag);
-        //$this->DownurlStrName = 'download_url';
         $this->DownurlStrName = 'url';
         $res = $this->get_access_token(getConfig('refresh_token', $tag));
     }
@@ -477,14 +474,13 @@ class AliyundriveOpen extends Aliyundrive {
                 $html = '
         <div>
             <form action="?Finish&disktag=' . $_GET['disktag'] . '&AddDisk=' . get_class($this) . '" method="post" onsubmit="return notnull(this);">
-                <label><input type="radio" name="driveId" value="' . $result['default_drive_id'] . '"' . ($result['default_drive_id'] == $this->driveId ? ' checked' : '') . '>' . '用普通空间 ' . getconstStr(' ') . '</label><br>
+                <label><input type="radio" name="driveId" value="' . $result['default_drive_id'] . '"' . ($result['default_drive_id'] == $this->driveId ? ' checked' : '') . '>' . '用备份盘 </label><br>
                 <label><input type="radio" name="driveId" value="' . $result['resource_drive_id'] . '"' . ($result['resource_drive_id'] == $this->driveId ? ' checked' : '') . '>' . '用资源库 </label><br>
                 <input type="submit" value="' . getconstStr('Submit') . '">
             </form>
         </div>
         <script>
-            function notnull(t)
-            {
+            function notnull(t) {
                 if (t.driveId.value==\'\') {
                         alert(\'Select a Disk\');
                         return false;
