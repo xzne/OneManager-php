@@ -114,7 +114,9 @@ class Aliyundrive {
                             $files['name'] = $item['name'];
                             $files['time'] = $item['updated_at'];
                             $files['size'] = $item['size'];
-                        } else $files = $item;
+                        } else {
+                            $files = $item;
+                        }
                     }
                 }
                 //echo $files['name'];
@@ -142,6 +144,16 @@ class Aliyundrive {
                         $files['content']['body'] = 'File too large.';
                     }
                     //error_log1($files['name'] . ' : ' . json_encode($files['content']) . PHP_EOL);
+                }
+            } else {
+                // clear txt cache in this folder
+                foreach ($files['items'] as $item) {
+                    $filename = path_format($path . "/" . $item['name']);
+                    //error_log1($filename);
+                    if ($tmpcache = getcache('path_' . $filename, $this->disktag)) {
+                        //error_log1("Clear content.");
+                        savecache('path_' . $filename, "", $this->disktag);
+                    }
                 }
             }
             if (!$files) {
@@ -188,7 +200,7 @@ class Aliyundrive {
         $header["content-type"] = "application/json; charset=utf-8";
         $header['authorization'] = 'Bearer ' . $this->access_token;
 
-        $data['limit'] = 200;
+        //$data['limit'] = 200;
         $data['marker'] = null;
         $data['drive_id'] = $this->driveId;
         $data['parent_file_id'] = $parent_file_id;
