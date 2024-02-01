@@ -1,20 +1,13 @@
 <?php
 // https://www.yuque.com/aliyundrive/zpfszx
 
-class AliyundriveOpen {
-    protected $access_token;
-    protected $disktag;
+if (!class_exists('Aliyundrive')) require 'Aliyundrive.php';
+class AliyundriveOpen extends Aliyundrive {
     protected $client_id;
     protected $client_secret;
-    protected $oauth_url;
     protected $my_oauth_url;
     protected $scope;
     protected $redirect_uri;
-    protected $api_url;
-    protected $api_url_v3;
-    protected $driveId;
-    protected $DownurlStrName;
-    public $error;
 
     function __construct($tag) {
         $this->disktag = $tag;
@@ -34,153 +27,6 @@ class AliyundriveOpen {
         $res = $this->get_access_token(getConfig('refresh_token', $tag));
     }
 
-    public function isfine() {
-        if (!$this->access_token) return false;
-        else return true;
-    }
-    public function show_base_class() {
-        return get_class();
-        //$tmp[0] = get_class();
-        //$tmp[1] = get_class($this);
-        //return $tmp;
-    }
-
-    public function ext_show_innerenv() {
-        return ['driveId'];
-    }
-
-    public function list_files($path = '/') {
-
-        $files = $this->list_path($path);
-
-        return $this->files_format($files);
-    }
-
-    protected function files_format($files) {
-        //return $files;
-        if ($files['type'] == 'file') {
-            $tmp['type'] = 'file';
-            $tmp['id'] = $files['file_id'];
-            if (isset($files['name'])) $tmp['name'] = $files['name'];
-            elseif (isset($files['file_name'])) $tmp['name'] = $files['file_name'];
-            $tmp['time'] = $files['updated_at'];
-            $tmp['size'] = $files['size'];
-            $tmp['mime'] = $files['file']['mimeType'];
-            $tmp['url'] = $files[$this->DownurlStrName];
-            $tmp['content'] = $files['content'];
-            if (isset($files['exist'])) $tmp['exist'] = $files['exist'];
-            if (isset($files['rapid_upload'])) $tmp['rapid_upload'] = $files['rapid_upload'];
-        } elseif ($files['type'] == 'folder' || isset($files['items'])) {
-            $tmp['type'] = 'folder';
-            $tmp['id'] = $files['file_id'];
-            if (isset($files['name'])) $tmp['name'] = $files['name'];
-            elseif (isset($files['file_name'])) $tmp['name'] = $files['file_name'];
-            $tmp['time'] = $files['updated_at'];
-            $tmp['size'] = $files['size'];
-            //$tmp['page'] = $files['folder']['page'];
-            foreach ($files['items'] as $file) {
-                $filename = strtolower($file['name']);
-                if ($file['type'] == 'file') {
-                    $tmp['list'][$filename]['type'] = 'file';
-                    $tmp['list'][$filename]['url'] = $file[$this->DownurlStrName];
-                    $tmp['list'][$filename]['mime'] = $file['file']['content_type'];
-                } elseif ($file['type'] == 'folder') {
-                    $tmp['list'][$filename]['type'] = 'folder';
-                }
-                //$tmp['id'] = $file['parent_file_id'];
-                $tmp['list'][$filename]['id'] = $file['file_id'];
-                $tmp['list'][$filename]['name'] = $file['name'];
-                $tmp['list'][$filename]['time'] = $file['updated_at'];
-                $tmp['list'][$filename]['size'] = $file['size'];
-                //$tmp['childcount']++;
-            }
-        } elseif (isset($files['code']) || isset($files['error'])) {
-            return $files;
-        }
-        //error_log1(json_encode($tmp));
-        return $tmp;
-    }
-
-    protected function list_path($path = '/') {
-        global $exts;
-        while (substr($path, -1) == '/') $path = substr($path, 0, -1);
-        if ($path == '') $path = '/';
-        if (!($files = getcache('path_' . $path, $this->disktag))) {
-            if ($path == '/' || $path == '') {
-                $files = $this->fileList('root');
-                //error_log1('root_id' . $files['file_id']);
-                $files['file_id'] = 'root';
-                $files['type'] = 'folder';
-                //error_log1(json_encode($files, JSON_PRETTY_PRINT));
-            } else {
-                $tmp = splitlast($path, '/');
-                $parent_path = $tmp[0];
-                $filename = urldecode($tmp[1]);
-                $parent_folder = $this->list_path($parent_path);
-                foreach ($parent_folder['items'] as $item) {
-                    if ($item['name'] == $filename) {
-                        if ($item['type'] == 'folder') {
-                            $files = $this->fileList($item['file_id']);
-                            $files['type'] = 'folder';
-                            $files['file_id'] = $item['file_id'];
-                            $files['name'] = $item['name'];
-                            $files['time'] = $item['updated_at'];
-                            $files['size'] = $item['size'];
-                        } else $files = $item;
-                    }
-                }
-                //echo $files['name'];
-            }
-            if ($files['type'] == 'file') {
-                if (in_array(strtolower(splitlast($files['name'], '.')[1]), $exts['txt'])) {
-                    if ($files['size'] < 1024 * 1024) {
-                        if (!(isset($files['content']) && $files['content']['stat'] == 200)) {
-                            $header['Referer'] = 'https://www.aliyundrive.com/';
-                            $header['User-Agent'] = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/89.0.4389.90 Safari/537.36';
-                            $content1 = curl('GET', $files[$this->DownurlStrName], '', $header);
-                            $tmp = null;
-                            $tmp = json_decode(json_encode($content1), true);
-                            if ($tmp['body'] === null) {
-                                $tmp['body'] = iconv("GBK", 'UTF-8//TRANSLIT', $content1['body']);
-                                $tmp = json_decode(json_encode($tmp), true);
-                                if ($tmp['body'] !== null) $content1['body'] = $tmp['body'];
-                            }
-                            //error_log1('body : ' . $content1['body'] . PHP_EOL);
-                            $files['content'] = $content1;
-                            savecache('path_' . $path, $files, $this->disktag);
-                        }
-                    } else {
-                        $files['content']['stat'] = 202;
-                        $files['content']['body'] = 'File too large.';
-                    }
-                    //error_log1($files['name'] . ' : ' . json_encode($files['content']) . PHP_EOL);
-                }
-            }
-            if (!$files) {
-                $files['error']['code'] = 'Not Found';
-                $files['error']['message'] = $path . ' Not Found';
-                $files['error']['stat'] = 404;
-            } elseif (isset($files['stat'])) {
-                $files['error']['stat'] = $files['stat'];
-                $files['error']['code'] = 'Error';
-                $files['error']['message'] = $files['body'];
-                unset($files['file_id']);
-                unset($files['type']);
-            } elseif (isset($files['code'])) {
-                $files['error']['stat'] = 500;
-                $files['error']['code'] = $files['code'];
-                $files['error']['message'] = $files['message'];
-                unset($files['file_id']);
-                unset($files['type']);
-            } else {
-                savecache('path_' . $path, $files, $this->disktag, 600);
-            }
-        }
-        //error_log1('path:' . $path . ', files:' . substr(json_encode($files), 0, 150));
-        //error_log1('path:' . $path . ', files:' . json_encode($files));
-        return $files;
-    }
-
     protected function fileGet($file_id) {
         $url = $this->api_url . 'openFile/get';
 
@@ -195,7 +41,6 @@ class AliyundriveOpen {
         else return $res;
     }
     protected function fileList($parent_file_id) {
-        //$url = $this->api_url_v3 . '/file/list';
         $url = $this->api_url . 'openFile/list';
 
         $header["content-type"] = "application/json; charset=utf-8";
@@ -281,7 +126,7 @@ class AliyundriveOpen {
 
         $result = $this->tmpfileCreate($folder['id'], $tmp, $passfilename);
 
-        if ($result['stat'] == 201) {
+        if ($result['stat'] == 200) {
             //error_log1('1,url:' . $url .' res:' . json_encode($result));
             $res = json_decode($result['body'], true);
             $url = $res['part_info_list'][0]['upload_url'];
@@ -346,67 +191,6 @@ class AliyundriveOpen {
         //error_log1('result:' . json_encode($result));
         return output(json_encode($this->files_format(json_decode($result['body'], true))), $result['stat']);
     }
-    public function Copy1($file) {
-        if (!$file['id']) {
-            $oldfile = $this->list_path($file['path'] . '/' . $file['name']);
-            //error_log1('res:' . json_encode($res));
-            //$file['id'] = $res['file_id'];
-        } else {
-            $oldfile = $this->fileGet($file['id']);
-        }
-        if ($oldfile['type'] == 'folder') return output('Can not copy folder', 415);
-        if (!function_exists('bcadd')) {
-            // no php-bcmath
-            if ($bcmathurl = getConfig('bcmathUrl', $this->disktag)) {
-                if (strpos($bcmathurl, '?')) {
-                    $bcmathurl .= '&dividend=0x' . substr(md5($this->access_token), 0, 16) . '&divisor=' . $oldfile['size'];
-                } else {
-                    $bcmathurl .= '?dividend=0x' . substr(md5($this->access_token), 0, 16) . '&divisor=' . $oldfile['size'];
-                }
-                $o = curl('GET', $bcmathurl)['body'];
-            } else {
-                return output('No bcmath module, can not copy', 415);
-            }
-        } else {
-            $r = bchexdec(substr(md5($this->access_token), 0, 16));
-            $o = bcmod($r, $oldfile['size']);
-        }
-        $res = curl('GET', $oldfile[$this->DownurlStrName], '', [
-            'Referer' => '', 'Range' => 'bytes=' . $o . '-' . ($o + 7)
-        ]);
-        if ($res['stat'] == 206) {
-            $proof_code = base64_encode($res['body']);
-            $url = 'https://api.aliyundrive.com/adrive/v2/file/createWithFolders';
-            $header["content-type"] = "application/json; charset=utf-8";
-            $header['authorization'] = 'Bearer ' . $this->access_token;
-            $data['check_name_mode'] = 'auto_rename'; // ignore, auto_rename, refuse.
-            $data['content_hash'] = $oldfile['content_hash'];
-            $data['content_hash_name'] = 'sha1';
-            $data['drive_id'] = $this->driveId;
-            $data['name'] = $oldfile['name'];
-            $data['parent_file_id'] = $oldfile['parent_file_id'];
-            $data['part_info_list'][0]['part_number'] = 1;
-            $data['proof_code'] = $proof_code;
-            $data['proof_version'] = 'v1';
-            $data['size'] = $oldfile['size'];
-            $data['type'] = 'file';
-            $result = curl('POST', $url, json_encode($data), $header);
-            /*if ($result['stat']==201) {
-                $res = json_decode($result['body'], true);
-                if ($res['rapid_upload']) return output('rapid upload', 200);
-                $url = $res['part_info_list'][0]['upload_url'];
-                if (!$url) { // 无url，应该算秒传
-                    return output('no up url', 200);
-                } else {
-                    return output(json_encode($this->files_format(json_decode($result['body'], true))), $result['stat']);
-                }
-            }*/
-            //error_log1('2,url:' . $url .' res:' . json_encode($result));
-            return output(json_encode($this->files_format(json_decode($result['body'], true))), $result['stat']);
-        } else {
-            return output("Get proof error\n" . json_encode($res), 415);
-        }
-    }
     public function Edit($file, $content) {
         $tmp = splitlast($file['path'], '/');
         $folderpath = $tmp[0];
@@ -420,7 +204,7 @@ class AliyundriveOpen {
 
         $result = $this->tmpfileCreate($this->list_path($folderpath)['file_id'], $tmp1, $filename);
 
-        if ($result['stat'] == 201) {
+        if ($result['stat'] == 200) {
             //error_log1('1,url:' . $url .' res:' . json_encode($result));
             $res = json_decode($result['body'], true);
             $url = $res['part_info_list'][0]['upload_url'];
@@ -456,7 +240,7 @@ class AliyundriveOpen {
 
             $result = $this->tmpfileCreate($folder['id'], $tmp, $name);
 
-            if ($result['stat'] == 201) {
+            if ($result['stat'] == 200) {
                 //error_log1('1,url:' . $url .' res:' . json_encode($result));
                 $res = json_decode($result['body'], true);
                 if (isset($res['exist']) && $res['exist'] != false) {
@@ -492,20 +276,6 @@ class AliyundriveOpen {
             $parentId = json_decode($this->folderCreate($parentId, $tmp[0])['body'], true)['file_id'];
             $folderName = $tmp[1];
         }
-        $url = $this->api_url . '/file/create';
-
-        $header["content-type"] = "application/json; charset=utf-8";
-        $header['authorization'] = 'Bearer ' . $this->access_token;
-
-        $data['check_name_mode'] = 'refuse'; // ignore, auto_rename, refuse.
-        $data['drive_id'] = $this->driveId;
-        $data['name'] = $folderName;
-        $data['parent_file_id'] = $parentId;
-        $data['type'] = 'folder';
-
-        return curl('POST', $url, json_encode($data), $header);
-    }
-    protected function fileCreate2($parentId, $fileName, $sha1, $size, $part_number) {
         $url = $this->api_url . 'openFile/create';
 
         $header["content-type"] = "application/json; charset=utf-8";
@@ -513,17 +283,9 @@ class AliyundriveOpen {
 
         $data['drive_id'] = $this->driveId;
         $data['parent_file_id'] = $parentId;
-        $data['name'] = $fileName;
-        $data['type'] = 'file';
+        $data['name'] = $folderName;
+        $data['type'] = 'folder';
         $data['check_name_mode'] = 'refuse'; // ignore, auto_rename, refuse.
-        for ($i = 0; $i < $part_number; $i++) {
-            $data['part_info_list'][$i]['part_number'] = $i + 1;
-        }
-        $data['size'] = (int)$size;
-        $data['content_hash'] = $sha1;
-        $data['content_hash_name'] = 'sha1';
-        $data['proof_code'] = '';
-        $data['proof_version'] = 'v1';
 
         return curl('POST', $url, json_encode($data), $header);
     }
@@ -554,22 +316,20 @@ class AliyundriveOpen {
     protected function tmpfileCreate($parentId, $tmpFilePath, $tofileName = '') {
         $sha1 = sha1_file($tmpFilePath);
         if ($tofileName == '') $tofileName = splitlast($tmpFilePath, '/')[1];
-        $url = $this->api_url . '/file/create';
+        $url = $this->api_url . 'openFile/create';
 
         $header["content-type"] = "application/json; charset=utf-8";
         $header['authorization'] = 'Bearer ' . $this->access_token;
 
-        $data['check_name_mode'] = 'refuse'; // ignore, auto_rename, refuse.
-        $data['content_hash'] = $sha1;
-        $data['content_hash_name'] = 'sha1';
-        $data['content_type'] = 'text/plain'; // now only txt
         $data['drive_id'] = $this->driveId;
-        $data['ignoreError'] = false;
-        $data['name'] = $tofileName;
         $data['parent_file_id'] = $parentId;
+        $data['name'] = $tofileName;
+        $data['type'] = 'file';
+        $data['check_name_mode'] = 'refuse'; // ignore, auto_rename, refuse.
         $data['part_info_list'][0]['part_number'] = 1; // now only txt
         $data['size'] = filesize($tmpFilePath);
-        $data['type'] = 'file';
+        $data['content_hash'] = $sha1;
+        $data['content_hash_name'] = 'sha1';
 
         return curl('POST', $url, json_encode($data), $header);
     }
@@ -592,11 +352,6 @@ class AliyundriveOpen {
         return curl('POST', $url, json_encode($data), $header);
     }
 
-    public function get_thumbnails_url($path = '/') {
-        $res = $this->list_path($path);
-        $thumb_url = $res['thumbnail'];
-        return $thumb_url;
-    }
     public function smallfileupload($path, $tmpfile) {
         if (!$_SERVER['admin']) {
             $tmp1 = splitlast($tmpfile['name'], '.');
@@ -608,7 +363,7 @@ class AliyundriveOpen {
         //$content = file_get_contents($tmpfile['tmp_name']);
         $result = $this->tmpfileCreate($this->list_path($_SERVER['list_path'] . '/' . $path . '/')['file_id'], $tmpfile['tmp_name'], $filename);
         //error_log1('1,url:' . $url .' res:' . json_encode($result));
-        if ($result['stat'] == 201) {
+        if ($result['stat'] == 200) {
             $res = json_decode($result['body'], true);
             $url = $res['part_info_list'][0]['upload_url'];
             if (!$url) { // 无url，应该算秒传
@@ -651,83 +406,6 @@ class AliyundriveOpen {
         }
         return output(json_encode($this->files_format($res), JSON_UNESCAPED_SLASHES), $result['stat']);
     }
-    public function bigfileupload($path) {
-        if (isset($_POST['uploadid'])) {
-            // Complete
-            $result = $this->fileComplete($_POST['fileid'], $_POST['uploadid'], json_decode($_POST['etag'], true));
-            return output(json_encode($this->files_format(json_decode($result['body'], true))), $result['stat']);
-        } else {
-            if (isset($_POST['CalcProof'])) {
-                return output(substr(md5($this->access_token), 0, 16), 200);
-                // Calc proof code
-                /*if (!function_exists('bcadd')) {
-                    // no php-bcmath
-                    return output(0, 200);
-                } else {
-                    $r = bchexdec( substr(md5($this->access_token), 0, 16) );
-                    $i = $_POST['filesize'];
-                    //$o = $i ? bcmod($r, $i) : 0;
-                    $o = bcmod($r, $i);
-                    return output($o, 200);
-                }*/
-            }
-            if ($_POST['upbigfilename'] == '') return output('error: no file name', 400);
-            if (!is_numeric($_POST['filesize'])) return output('error: no file size', 400);
-            if (!isset($_POST['filesha1'])) return output('error: no file sha1', 400);
-
-            $tmp = splitlast($_POST['upbigfilename'], '/');
-            if ($tmp[1] != '') {
-                $fileinfo['name'] = $tmp[1];
-                if ($_SERVER['admin']) $fileinfo['path'] = $tmp[0];
-            } else {
-                $fileinfo['name'] = $_POST['upbigfilename'];
-            }
-            $fileinfo['size'] = $_POST['filesize'];
-            $fileinfo['filelastModified'] = $_POST['filelastModified'];
-            if ($_SERVER['admin']) {
-                $filename = $fileinfo['name'];
-            } else {
-                $tmp1 = splitlast($fileinfo['name'], '.');
-                if ($tmp1[0] == '' || $tmp1[1] == '') $filename = $_POST['filesha1'];
-                else $filename = $_POST['filesha1'] . '.' . $tmp1[1];
-            }
-
-            $parent = $this->list_path($path . '/' . $fileinfo['path']);
-            if (isset($parent['file_id'])) {
-                $parent_file_id = $parent['file_id'];
-            } else {
-                $res = $this->folderCreate($this->list_path($path)['file_id'], $fileinfo['path']);
-                //error_log1($res['body']);
-                $parent_file_id = json_decode($res['body'], true)['file_id'];
-            }
-            //if (!function_exists('bcadd')) {
-            //    $response = $this->fileCreate($parent_file_id, $filename, $_POST['filesha1'], $fileinfo['size'], ceil($fileinfo['size']/$_POST['chunksize']));
-            //} else {
-            $response = $this->fileCreate($parent_file_id, $filename, $_POST['filesha1'], $_POST['proof_code'], $fileinfo['size'], ceil($fileinfo['size'] / $_POST['chunksize']));
-            //}
-            $res = json_decode($response['body'], true);
-            if ($response['stat'] == 200) $response['stat'] = 201;
-            if (isset($res['exist'])) {
-                // 已经有
-                //error_log1('exist:' . json_encode($res));
-                return output(json_encode($this->files_format(json_decode($response['body'], true))), $response['stat']);
-                //return output('{"type":"file","name":"' . $_POST['upbigfilename'] . '", "exist":true}', 200);
-            }
-            if (isset($res['rapid_upload']) && $res['rapid_upload'] != false) {
-                // 秒传
-                //error_log1('rapid up:' . json_encode($res));
-                return output(json_encode($this->files_format(json_decode($response['body'], true))), $response['stat']);
-                //return output('{"type":"file","name":"' . $_POST['upbigfilename'] . '", "rapid upload":true}', 200);
-            }
-            //if ($response['stat']<500) {
-            //    $responsearry = json_decode($response['body'], true);
-            //    if (isset($responsearry['error'])) return output($response['body'], $response['stat']);
-            //    $fileinfo['uploadUrl'] = $responsearry['uploadUrl'];
-            //    if ($fileinfo['size']>10*1024*1024) $this->MSAPI('PUT', path_format($path . '/' . $cachefilename), json_encode($fileinfo, JSON_PRETTY_PRINT), $this->access_token);
-            //}
-            return output($response['body'], $response['stat']);
-        }
-    }
 
     public function AddDisk() {
         global $constStr;
@@ -762,17 +440,17 @@ class AliyundriveOpen {
                 return message($html, $title, 201);
             } else {
                 $str = '
-<script>
-    var status = "' . $response['DplStatus'] . '";
-    var uploadList = setInterval(function(){
-        if (document.getElementById("dis").style.display=="none") {
-            console.log(min++);
-        } else {
-            clearInterval(uploadList);
-            location.href = "' . $url . '";
-        }
-    }, 1000);
-</script>';
+        <script>
+            var status = "' . $response['DplStatus'] . '";
+            var uploadList = setInterval(function(){
+                if (document.getElementById("dis").style.display=="none") {
+                    console.log(min++);
+                } else {
+                    clearInterval(uploadList);
+                    location.href = "' . $url . '";
+                }
+            }, 1000);
+        </script>';
                 return message($str, getconstStr('WaitJumpIndex'), 201, 1);
             }
         }
@@ -797,24 +475,24 @@ class AliyundriveOpen {
                 //$tmp['default_sbox_drive_id'] = $result['default_sbox_drive_id'];
                 $title = 'Select Driver';
                 $html = '
-<div>
-    <form action="?Finish&disktag=' . $_GET['disktag'] . '&AddDisk=' . get_class($this) . '" method="post" onsubmit="return notnull(this);">
-        <label><input type="radio" name="driveId" value="' . $result['default_drive_id'] . '"' . ($result['default_drive_id'] == $this->driveId ? ' checked' : '') . '>' . '用普通空间 ' . getconstStr(' ') . '</label><br>
-        <label><input type="radio" name="driveId" value="' . $result['resource_drive_id'] . '"' . ($result['resource_drive_id'] == $this->driveId ? ' checked' : '') . '>' . '用资源库 </label><br>
-        <input type="submit" value="' . getconstStr('Submit') . '">
-    </form>
-</div>
-<script>
-    function notnull(t)
-    {
-        if (t.driveId.value==\'\') {
-                alert(\'Select a Disk\');
-                return false;
-        }
-        return true;
-    }
-</script>
-    ';
+        <div>
+            <form action="?Finish&disktag=' . $_GET['disktag'] . '&AddDisk=' . get_class($this) . '" method="post" onsubmit="return notnull(this);">
+                <label><input type="radio" name="driveId" value="' . $result['default_drive_id'] . '"' . ($result['default_drive_id'] == $this->driveId ? ' checked' : '') . '>' . '用普通空间 ' . getconstStr(' ') . '</label><br>
+                <label><input type="radio" name="driveId" value="' . $result['resource_drive_id'] . '"' . ($result['resource_drive_id'] == $this->driveId ? ' checked' : '') . '>' . '用资源库 </label><br>
+                <input type="submit" value="' . getconstStr('Submit') . '">
+            </form>
+        </div>
+        <script>
+            function notnull(t)
+            {
+                if (t.driveId.value==\'\') {
+                        alert(\'Select a Disk\');
+                        return false;
+                }
+                return true;
+            }
+        </script>
+        ';
                 return message($html, $title, 201);
             } else {
                 return message('<pre>' . json_encode(json_decode($res['body']), JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE) . '</pre>', $res['stat']);
@@ -926,87 +604,87 @@ class AliyundriveOpen {
                 }
                 $title = getconstStr('MayinEnv');
                 $html = '
-    <a href="" id="a1">' . getconstStr('Wait') . '</a>
-    <script>
-        var url = location.protocol + "//" + location.host + "' . $url . '?install1&disktag=' . $this->disktag . '&AddDisk=' . get_class($this) . '";
-        url = "' . $this->oauth_url . 'authorize?client_id=' . $client_id1 . '&redirect_uri=' . $this->redirect_uri . '&scope=' . $this->scope . '&response_type=code&state=' . '" + window.btoa(url);
-        document.getElementById(\'a1\').href = url;
-        document.getElementById(\'a1\').innerText = "跳转去登录并授权";
-        var i = 0;
-        var status = "' . $response['DplStatus'] . '";
-        var uploadList = setInterval(function(){
-            if (document.getElementById("dis").style.display=="none") {
-                console.log(i++); 
-            } else {
-                clearInterval(uploadList);
-                //window.open(url, "_blank");
-                location.href = url;
-            }
-        }, 1000);
-    </script>
-    ';
+        <a href="" id="a1">' . getconstStr('Wait') . '</a>
+        <script>
+            var url = location.protocol + "//" + location.host + "' . $url . '?install1&disktag=' . $this->disktag . '&AddDisk=' . get_class($this) . '";
+            url = "' . $this->oauth_url . 'authorize?client_id=' . $client_id1 . '&redirect_uri=' . $this->redirect_uri . '&scope=' . $this->scope . '&response_type=code&state=' . '" + window.btoa(url);
+            document.getElementById(\'a1\').href = url;
+            document.getElementById(\'a1\').innerText = "跳转去登录并授权";
+            var i = 0;
+            var status = "' . $response['DplStatus'] . '";
+            var uploadList = setInterval(function(){
+                if (document.getElementById("dis").style.display=="none") {
+                    console.log(i++); 
+                } else {
+                    clearInterval(uploadList);
+                    //window.open(url, "_blank");
+                    location.href = url;
+                }
+            }, 1000);
+        </script>
+        ';
                 return message($html, $title, 201, 1);
             }
         }
 
         $html = '
-<div>
-    <form id="form1" action="" method="post" onsubmit="return notnull(this);">
-        ' . getconstStr('DiskTag') . ': (' . getConfig('disktag') . ')
-        <input type="text" name="disktag_add" placeholder="' . getconstStr('EnvironmentsDescription')['disktag'] . '" style="width:100%"><br>
-        ' . getconstStr('DiskName') . ':
-        <input type="text" name="diskname" placeholder="' . getconstStr('EnvironmentsDescription')['diskname'] . '" style="width:100%"><br>
-        <br>
-        <div id="NT_custom">
-            <label><input type="checkbox" name="Drive_custom" onclick="document.getElementById(\'custom_app\').style.display=(this.checked?\'\':\'none\');">' . getconstStr('CustomIdSecret') . '</label><br>
-            <div id="custom_app" style="display:none;margin:10px 35px">
-                <a href="https://www.aliyundrive.com/developer/f" target="_blank">申请、创建应用</a><br>
-                App ID:<input type="text" name="client_id" style="width:100%" placeholder=""><br>
-                App Secret:<input type="text" name="client_secret" style="width:100%"><br>
-                授权回调URL:<br>' . $this->redirect_uri . '<br>
-            </div>
-        </div><br>';
+        <div>
+            <form id="form1" action="" method="post" onsubmit="return notnull(this);">
+                ' . getconstStr('DiskTag') . ': (' . getConfig('disktag') . ')
+                <input type="text" name="disktag_add" placeholder="' . getconstStr('EnvironmentsDescription')['disktag'] . '" style="width:100%"><br>
+                ' . getconstStr('DiskName') . ':
+                <input type="text" name="diskname" placeholder="' . getconstStr('EnvironmentsDescription')['diskname'] . '" style="width:100%"><br>
+                <br>
+                <div id="NT_custom">
+                    <label><input type="checkbox" name="Drive_custom" onclick="document.getElementById(\'custom_app\').style.display=(this.checked?\'\':\'none\');">' . getconstStr('CustomIdSecret') . '</label><br>
+                    <div id="custom_app" style="display:none;margin:10px 35px">
+                        <a href="https://www.aliyundrive.com/developer/f" target="_blank">申请、创建应用</a><br>
+                        App ID:<input type="text" name="client_id" style="width:100%" placeholder=""><br>
+                        App Secret:<input type="text" name="client_secret" style="width:100%"><br>
+                        授权回调URL:<br>' . $this->redirect_uri . '<br>
+                    </div>
+                </div><br>';
         if ($_SERVER['language'] == 'zh-cn') $html .= '你要理解 scfonedrive.github.io 是github上的静态网站，<br><font color="red">除非github真的挂掉</font>了，<br>不然，稍后你如果<font color="red">连不上</font>，请检查你的运营商或其它“你懂的”问题！<br>';
         $html .= '
         <br><font color="red">没写完，文件只能预览或下载，</font>不能重命名删除等。<br>
         <input type="submit" value="' . getconstStr('Submit') . '">
-    </form>
-</div>
-    <script>
-        function notnull(t) {
-            if (t.disktag_add.value==\'\') {
-                alert(\'' . getconstStr('DiskTag') . '\');
-                return false;
-            }
-            if (t.Drive_custom.checked) {
-                if (t.client_id.value==\'\') {
-                    alert(\'请输入App ID\');
-                    return false;
-                }
-                if (t.client_secret.value==\'\') {
-                    alert(\'请输入App Secret\');
-                    return false;
-                }
-            }
-            envs = [' . $envs . '];
-            if (envs.indexOf(t.disktag_add.value)>-1) {
-                alert("Do not input ' . $envs . '");
-                return false;
-            }
-            var reg = /^[a-zA-Z]([_a-zA-Z0-9]{1,})$/;
-            if (!reg.test(t.disktag_add.value)) {
-                alert(\'' . getconstStr('TagFormatAlert') . '\');
-                return false;
-            }
+            </form>
+        </div>
+            <script>
+                function notnull(t) {
+                    if (t.disktag_add.value==\'\') {
+                        alert(\'' . getconstStr('DiskTag') . '\');
+                        return false;
+                    }
+                    if (t.Drive_custom.checked) {
+                        if (t.client_id.value==\'\') {
+                            alert(\'请输入App ID\');
+                            return false;
+                        }
+                        if (t.client_secret.value==\'\') {
+                            alert(\'请输入App Secret\');
+                            return false;
+                        }
+                    }
+                    envs = [' . $envs . '];
+                    if (envs.indexOf(t.disktag_add.value)>-1) {
+                        alert("Do not input ' . $envs . '");
+                        return false;
+                    }
+                    var reg = /^[a-zA-Z]([_a-zA-Z0-9]{1,})$/;
+                    if (!reg.test(t.disktag_add.value)) {
+                        alert(\'' . getconstStr('TagFormatAlert') . '\');
+                        return false;
+                    }
 
-            document.getElementById("form1").action="?install0&disktag=" + t.disktag_add.value + "&AddDisk=' . get_class($this) . '";
-            //var expd = new Date();
-            //expd.setTime(expd.getTime()+(2*60*60*1000));
-            //var expires = "expires="+expd.toGMTString();
-            //document.cookie=\'disktag=\'+t.disktag_add.value+\'; path=/; \'+expires;
-            return true;
-        }
-    </script>';
+                    document.getElementById("form1").action="?install0&disktag=" + t.disktag_add.value + "&AddDisk=' . get_class($this) . '";
+                    //var expd = new Date();
+                    //expd.setTime(expd.getTime()+(2*60*60*1000));
+                    //var expires = "expires="+expd.toGMTString();
+                    //document.cookie=\'disktag=\'+t.disktag_add.value+\'; path=/; \'+expires;
+                    return true;
+                }
+            </script>';
         $title = 'Select Account Type';
         return message($html, $title, 201);
     }
@@ -1029,7 +707,10 @@ class AliyundriveOpen {
             } else {
                 $url = $this->my_oauth_url;
                 $tmp = no_return_curl('GET', $url . "test");
-                if ($tmp['stat'] == 0) return false;
+                if ($tmp['stat'] == 0) {
+                    $this->error = "授权服务器连接失败";
+                    return false;
+                }
             }
             $response = null;
             while ($response['stat'] == 0 && $p < 3) {
