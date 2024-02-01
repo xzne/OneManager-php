@@ -43,7 +43,7 @@ class AliyundriveOpen extends Aliyundrive {
         $header["content-type"] = "application/json; charset=utf-8";
         $header['authorization'] = 'Bearer ' . $this->access_token;
 
-        $data['limit'] = 200;
+        //$data['limit'] = 200;
         $data['marker'] = null;
         $data['drive_id'] = $this->driveId;
         $data['parent_file_id'] = $parent_file_id;
@@ -55,7 +55,7 @@ class AliyundriveOpen extends Aliyundrive {
         $data['order_direction'] = 'ASC'; //DESC
 
         $res = curl('POST', $url, json_encode($data), $header);
-        error_log1($res['stat'] . $res['body']);
+        //error_log1($res['stat'] . $res['body']);
         if ($res['stat'] == 200) {
             $body = json_decode($res['body'], true);
             $body1 = $body;
