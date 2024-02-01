@@ -646,7 +646,7 @@ class AliyundriveOpen extends Aliyundrive {
                 </div><br>';
         if ($_SERVER['language'] == 'zh-cn') $html .= '你要理解 scfonedrive.github.io 是github上的静态网站，<br><font color="red">除非github真的挂掉</font>了，<br>不然，稍后你如果<font color="red">连不上</font>，请检查你的运营商或其它“你懂的”问题！<br>';
         $html .= '
-        <br><font color="red">没写完，文件只能预览或下载，</font>不能重命名删除等。<br>
+        <br>
         <input type="submit" value="' . getconstStr('Submit') . '">
             </form>
         </div>
