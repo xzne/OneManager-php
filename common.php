@@ -1076,7 +1076,7 @@ function needUpdate() {
 
 function output($body, $statusCode = 200, $headers = ['Content-Type' => 'text/html'], $isBase64Encoded = false) {
     if (isset($_SERVER['Set-Cookie'])) $headers['Set-Cookie'] = $_SERVER['Set-Cookie'];
-    if (baseclassofdrive() == 'Aliyundrive' || baseclassofdrive() == 'AliyundriveOpen' || baseclassofdrive() == 'BaiduDisk') $headers['Referrer-Policy'] = 'no-referrer';
+    if (baseclassofdrive() == 'Aliyundrive' || baseclassofdrive() == 'BaiduDisk') $headers['Referrer-Policy'] = 'no-referrer';
     //$headers['Referrer-Policy'] = 'same-origin';
     //$headers['X-Frame-Options'] = 'sameorigin';
     return [
@@ -1216,8 +1216,6 @@ function adminoperate($path) {
     $tmparr['statusCode'] = 0;
 
     if (isset($tmpget['RefreshCache'])) {
-        //$path1 = path_format($_SERVER['list_path'] . path_format($path));
-        //if ($path1!='/'&&substr($path1, -1)=='/') $path1=substr($path1, 0, -1);
         savecache('path_' . $path1 . '/?password', '', $_SERVER['disktag'], 1);
         savecache('customTheme', '', '', 1);
         return message('<meta http-equiv="refresh" content="2;URL=./">
@@ -2508,7 +2506,6 @@ function render_list($path = '', $files = []) {
         }
         if ($_SERVER['is_guestup_path'] || ($_SERVER['admin'] && $files['type'] == 'folder' && $_SERVER['ishidden'] < 4)) {
             $now_driver = baseclassofdrive();
-            if ($now_driver == "AliyundriveOpen") $now_driver = "Aliyundrive";
             if ($now_driver) {
                 while (strpos($html, '<!--UploadJsStart-->')) $html = str_replace('<!--UploadJsStart-->', '', $html);
                 while (strpos($html, '<!--UploadJsEnd-->')) $html = str_replace('<!--UploadJsEnd-->', '', $html);
