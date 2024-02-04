@@ -71,7 +71,7 @@ class Aliyundrive {
                 if ($file['type'] == 'file') {
                     $tmp['list'][$filename]['type'] = 'file';
                     $tmp['list'][$filename]['url'] = $file[$this->DownurlStrName];
-                    $tmp['list'][$filename]['mime'] = $file['file']['content_type'];
+                    $tmp['list'][$filename]['mime'] = isset($file['file']) ? $file['file']['content_type'] : $file['content_type'];
                 } elseif ($file['type'] == 'folder') {
                     $tmp['list'][$filename]['type'] = 'folder';
                 }
@@ -199,6 +199,9 @@ class Aliyundrive {
 
         $header["content-type"] = "application/json; charset=utf-8";
         $header['authorization'] = 'Bearer ' . $this->access_token;
+        //$header["X-Canary"] = "client=web,app=adrive,version=v4.9.0";
+        //$header["X-Device-Id"] = "2cGGHdWVOBgCAd3vp7L6i0ls";
+        //$header["X-Signature"] = "";
 
         //$data['limit'] = 200;
         $data['marker'] = null;
