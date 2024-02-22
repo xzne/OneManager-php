@@ -5,12 +5,12 @@ function getpath() {
     $_SERVER['firstacceptlanguage'] = strtolower(splitfirst(splitfirst($_SERVER['HTTP_ACCEPT_LANGUAGE'], ';')[0], ',')[0]);
     if (isset($_SERVER['HTTP_X_FORWARDED_FOR'])) $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_X_FORWARDED_FOR'];
     if (isset($_SERVER['HTTP_FLY_CLIENT_IP'])) $_SERVER['REMOTE_ADDR'] = $_SERVER['HTTP_FLY_CLIENT_IP'];
-    if ($_SERVER['REQUEST_SCHEME'] != 'http' && $_SERVER['REQUEST_SCHEME'] != 'https') {
+    if (!isset($_SERVER['REQUEST_SCHEME']) || $_SERVER['REQUEST_SCHEME'] != 'http' && $_SERVER['REQUEST_SCHEME'] != 'https') {
         if ($_SERVER['HTTP_X_FORWARDED_PROTO'] != '') {
             $tmp = explode(',', $_SERVER['HTTP_X_FORWARDED_PROTO'])[0];
             if ($tmp == 'http' || $tmp == 'https') $_SERVER['REQUEST_SCHEME'] = $tmp;
         }
-        if ($_SERVER['HTTP_FLY_FORWARDED_PROTO'] != '') $_SERVER['REQUEST_SCHEME'] = $_SERVER['HTTP_FLY_FORWARDED_PROTO'];
+        if (isset($_SERVER['HTTP_FLY_FORWARDED_PROTO'])) $_SERVER['REQUEST_SCHEME'] = $_SERVER['HTTP_FLY_FORWARDED_PROTO'];
     }
     $_SERVER['host'] = $_SERVER['REQUEST_SCHEME'] . '://' . $_SERVER['HTTP_HOST'];
     $_SERVER['referhost'] = explode('/', $_SERVER['HTTP_REFERER'])[2];
@@ -45,13 +45,9 @@ function getGET() {
         $getstrarr = explode("&", $getstr);
         foreach ($getstrarr as $getvalues) {
             if ($getvalues != '') {
-                $pos = strpos($getvalues, "=");
-                //echo $pos;
-                if ($pos > 0) {
-                    $getarry[urldecode(substr($getvalues, 0, $pos))] = urldecode(substr($getvalues, $pos + 1));
-                } else {
-                    $getarry[urldecode($getvalues)] = true;
-                }
+                $keyvalue = splitfirst($getvalues, "=");
+                if ($keyvalue[1] != "") $getarry[$keyvalue[0]] = $keyvalue[1];
+                else $getarry[$keyvalue[0]] = true;
             }
         }
     }
