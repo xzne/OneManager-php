@@ -12,6 +12,7 @@ document.addEventListener("DOMContentLoaded", function() {
     links.forEach(link => {
         // 检查链接是否是图片
         if (link.href.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i)) {
+            link.setAttribute('target', '_blank'); // 添加 target="_blank"
             link.addEventListener('click', function(event) {
                 event.preventDefault(); // 阻止默认下载行为
                 window.open(link.href, '_blank'); // 在新窗口中打开图片
@@ -36,7 +37,7 @@ document.addEventListener("DOMContentLoaded", function() {
 <td align="right">-</td>
 </tr><!--FolderListEnd--><!--FileListStart-->
 <tr>
-<td><A HREF="<!--FileEncodeReplaceUrl-->"><!--FileEncodeReplaceName--></A></td>
+<td><A HREF="<!--FileEncodeReplaceUrl__target='_blank'-->"><!--FileEncodeReplaceName--></A></td>
 <td align="right"><!--lastModifiedDateTime--></td>
 <td align="right"><!--size--></td>
 </tr><!--FileListEnd--><!--IsFolderEnd--><!--ListEnd-->
