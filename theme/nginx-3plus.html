@@ -4,6 +4,18 @@
 
 <head>
 <title><!--Sitename--> - /<!--PathArrayStart--><!--PathArrayName-->/<!--PathArrayEnd--></title>
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        // 获取所有的文件链接
+        const links = document.querySelectorAll("a[href$='.jpg'], a[href$='.png'], a[href$='.gif']"); // 根据需要添加文件格式
+        links.forEach(link => {
+            link.addEventListener("click", function(event) {
+                event.preventDefault(); // 阻止默认下载行为
+                window.open(link.href, '_blank'); // 在新窗口打开链接
+            });
+        });
+    });
+</script>
 </head>
 
 <body>
@@ -20,23 +32,11 @@
 <td align="right">-</td>
 </tr><!--FolderListEnd--><!--FileListStart-->
 <tr>
-<td><A HREF="<!--FileEncodeReplaceUrl-->" rel="noopener noreferrer" target="_blank" download=""><!--FileEncodeReplaceName--></A></td>
+<td><A HREF="<!--FileEncodeReplaceUrl-->" target="_blank"><!--FileEncodeReplaceName--></A></td> <!-- 添加target属性 -->
 <td align="right"><!--lastModifiedDateTime--></td>
 <td align="right"><!--size--></td>
 </tr><!--FileListEnd--><!--IsFolderEnd--><!--ListEnd-->
 </table>
 <hr>
-
-<script>
-  const links = document.querySelectorAll('a[href$=".jpg"], a[href$=".jpeg"], a[href$=".png"], a[href$=".gif"]');
-
-  links.forEach(link => {
-    link.rel = "noopener noreferrer";
-    link.target = "_blank";
-    link.download = "";
-  });
-</script>
-
 </body>
-
 </html>
