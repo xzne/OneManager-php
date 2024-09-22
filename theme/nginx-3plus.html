@@ -4,6 +4,38 @@
 
 <head>
     <title><!--Sitename--> - /<!--PathArrayStart--><!--PathArrayName-->/<!--PathArrayEnd--></title>
+    <style>
+        /* 模态框样式 */
+        .modal {
+            display: none; /* 隐藏模态框 */
+            position: fixed; /* 固定位置 */
+            z-index: 1000; /* 置于顶部 */
+            left: 0;
+            top: 0;
+            width: 100%; /* 全宽 */
+            height: 100%; /* 全高 */
+            overflow: auto; /* 启用滚动 */
+            background-color: rgb(0,0,0); /* 背景颜色 */
+            background-color: rgba(0,0,0,0.9); /* 背景透明 */
+        }
+
+        .modal-content {
+            margin: auto;
+            display: block;
+            width: 80%; /* 宽度 */
+            max-width: 700px; /* 最大宽度 */
+        }
+
+        .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+        }
+    </style>
 </head>
 
 <body>
@@ -27,7 +59,7 @@
         <!--FileListStart-->
         <tr>
             <td>
-                <a href="#" onclick="return handleFileClick('<!--FileEncodeReplaceUrl-->', '<!--FileEncodeReplaceName-->');">
+                <a href="#" onclick="openModal('<!--FileEncodeReplaceUrl-->'); return false;">
                     <!--FileEncodeReplaceName-->
                 </a>
             </td>
@@ -38,24 +70,34 @@
         <!--IsFolderEnd-->
         <!--ListEnd-->
     </table>
-    <hr>
+
+    <!-- 模态框 -->
+    <div id="myModal" class="modal">
+        <span class="close" onclick="closeModal()">&times;</span>
+        <img class="modal-content" id="modalImage" alt="图片预览">
+    </div>
 
     <script>
-        // 处理文件点击事件
-        function handleFileClick(fileUrl, fileName) {
-            const imageExtensions = ['jpg', 'jpeg', 'png', 'gif', 'bmp', 'webp'];
-            const extension = fileName.split('.').pop().toLowerCase();
+        // 打开模态框
+        function openModal(imageUrl) {
+            document.getElementById("modalImage").src = imageUrl; // 设置图片源
+            document.getElementById("myModal").style.display = "block"; // 显示模态框
+        }
 
-            if (imageExtensions.includes(extension)) {
-                // 如果是图片，打开新标签页
-                window.open(fileUrl, '_blank');
-            } else {
-                // 如果不是图片，弹出提示
-                alert('此文件无法预览。');
+        // 关闭模态框
+        function closeModal() {
+            document.getElementById("myModal").style.display = "none"; // 隐藏模态框
+        }
+
+        // 点击模态框外部关闭模态框
+        window.onclick = function(event) {
+            var modal = document.getElementById("myModal");
+            if (event.target == modal) {
+                modal.style.display = "none";
             }
-            return false; // 防止默认行为
         }
     </script>
+    <hr>
 </body>
 
 </html>
