@@ -3,46 +3,58 @@
 <meta name="viewport" content="width=device-width, initial-scale=5.0, maximum-scale=1.0, shrink-to-fit=no">
 
 <head>
-<title><!--Sitename--> - /<!--PathArrayStart--><!--PathArrayName-->/<!--PathArrayEnd--></title>
-<script>
-document.addEventListener("DOMContentLoaded", function() {
-    // 获取所有的链接
-    const links = document.querySelectorAll('a');
-
-    links.forEach(link => {
-        // 检查链接是否是图片
-        if (link.href.match(/\.(jpg|jpeg|png|gif|bmp|webp)$/i)) {
-            link.setAttribute('target', '_blank'); // 添加 target="_blank"
-            link.addEventListener('click', function(event) {
-                event.preventDefault(); // 阻止默认下载行为
-                window.open(link.href, '_blank'); // 在新窗口中打开图片
-            });
+    <title><!--Sitename--> - /<!--PathArrayStart--><!--PathArrayName-->/<!--PathArrayEnd--></title>
+    <script>
+      function showImage(url) {
+        var ext = url.split('.').pop().toLowerCase();
+        if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext)) {
+          var w = window.open("", "_blank");
+          w.document.write("<html><head><title>Image Preview</title></head><body style='margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background-color:#000;'><img src='" + url + "' style='max-width:100%;max-height:100%;'/><button onclick='window.close()' style='position:absolute;top:10px;right:10px;color:white;background:black;border:none;padding:10px;'>Close</button></body></html>");
+          w.document.close();
+          return false;
+        } else {
+          return true;
         }
-    });
-});
-</script>
+      }
+    </script>
+    <style>
+      @media (prefers-color-scheme: dark) {
+        body {
+          background-color: #121212;
+        }
+        td {
+          color: #f0f0f0;
+        }
+        h1 {
+          color: #f0f0f0;
+        }
+        a {
+          color: #9f9fff !important;
+        }
+      }
+    </style>
 </head>
 
 <body>
-<H1><!--Sitename--> - /<!--DiskPathArrayStart--><!--PathArrayName-->/<!--DiskPathArrayEnd--></H1>
-<hr>
-<table><!--BackArrowStart-->
-<tr>
-<td colspan="3"><A HREF="<!--BackArrowUrl-->">../</A></td>
-</tr>
-<!--BackArrowEnd--><!--ListStart--><!--IsFolderStart--><!--FolderListStart-->
-<tr>
-<td><A HREF="<!--FileEncodeReplaceUrl-->/"><!--FileEncodeReplaceName-->/</A></td>
-<td align="right"><!--lastModifiedDateTime--></td>
-<td align="right">-</td>
-</tr><!--FolderListEnd--><!--FileListStart-->
-<tr>
-<td><A HREF="<!--FileEncodeReplaceUrl__target='_blank'-->"><!--FileEncodeReplaceName--></A></td>
-<td align="right"><!--lastModifiedDateTime--></td>
-<td align="right"><!--size--></td>
-</tr><!--FileListEnd--><!--IsFolderEnd--><!--ListEnd-->
-</table>
-<hr>
+    <H1><!--Sitename--> - /<!--DiskPathArrayStart--><!--PathArrayName-->/<!--DiskPathArrayEnd--></H1>
+    <hr>
+    <table><!--BackArrowStart-->
+        <tr>
+            <td colspan="3"><A HREF="<!--BackArrowUrl-->">../</A></td>
+        </tr>
+        <!--BackArrowEnd--><!--ListStart--><!--IsFolderStart--><!--FolderListStart-->
+        <tr>
+            <td><A HREF="<!--FileEncodeReplaceUrl-->/"><!--FileEncodeReplaceName-->/</A></td>
+            <td align="right"><!--lastModifiedDateTime--></td>
+            <td align="right">-</td>
+        </tr><!--FolderListEnd--><!--FileListStart-->
+        <tr>
+            <td><A HREF="<!--FileEncodeReplaceUrl-->" onclick="return showImage(this.href);"><!--FileEncodeReplaceName--></A></td>
+            <td align="right"><!--lastModifiedDateTime--></td>
+            <td align="right"><!--size--></td>
+        </tr><!--FileListEnd--><!--IsFolderEnd--><!--ListEnd-->
+    </table>
+    <hr>
 </body>
 
 </html>
