@@ -5,10 +5,9 @@
 <head>
     <title><!--Sitename--> - /<!--PathArrayStart--><!--PathArrayName-->/<!--PathArrayEnd--></title>
     <script>
-      function showFile(url) {
+      function showImage(url) {
         var ext = url.split('.').pop().toLowerCase();
         var imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
-        var textTypes = ['txt'];
         
         if (imageTypes.includes(ext)) {
           var w = window.open("", "_blank");
@@ -26,7 +25,7 @@
                   }
                   @media (prefers-color-scheme: dark) {
                     body {
-                      background-color: #121212;
+                      background-color: #000;
                     }
                   }
                   @media (prefers-color-scheme: light) {
@@ -46,34 +45,6 @@
             </html>
           `);
           w.document.close();
-          return false; // 阻止默认行为
-        } else if (textTypes.includes(ext)) {
-          fetch(url)
-            .then(response => response.text())
-            .then(data => {
-              var w = window.open("", "_blank");
-              w.document.write(`
-                <html>
-                  <head>
-                    <title>Text Preview</title>
-                    <style>
-                      body {
-                        margin: 0;
-                        padding: 20px;
-                        font-family: monospace;
-                        background-color: #fff;
-                        color: #000;
-                        white-space: pre-wrap;
-                      }
-                    </style>
-                  </head>
-                  <body>
-                    <pre>${data}</pre>
-                  </body>
-                </html>
-              `);
-              w.document.close();
-            });
           return false; // 阻止默认行为
         } else {
           return true; // 允许默认行为
@@ -99,7 +70,7 @@
 </head>
 
 <body>
-    <h1><!--Sitename--> - /<!--DiskPathArrayStart--><!--PathArrayName-->/<!--PathArrayEnd--></h1>
+    <h1><!--Sitename--> - /<!--DiskPathArrayStart--><!--PathArrayName-->/<!--DiskPathArrayEnd--></h1>
     <hr>
     <table>
         <!--BackArrowStart-->
@@ -114,7 +85,7 @@
         </tr>
         <!--FolderListEnd--><!--FileListStart-->
         <tr>
-            <td><a href="<!--FileEncodeReplaceUrl-->" onclick="return showFile(this.href);"><!--FileEncodeReplaceName--></a></td>
+            <td><a href="<!--FileEncodeReplaceUrl-->" onclick="return showImage(this.href);"><!--FileEncodeReplaceName--></a></td>
             <td align="right"><!--lastModifiedDateTime--></td>
             <td align="right"><!--size--></td>
         </tr>
