@@ -27,11 +27,12 @@
         <!--FileListStart-->
         <tr>
             <td>
+                <!-- 使用链接而不是直接显示图片 -->
                 <a href="<!--FileEncodeReplaceUrl-->" target="_blank">
                     <!--FileEncodeReplaceName-->
-                    <!-- 如果文件是图片，显示缩略图 -->
-                    <img src="<!--FileEncodeReplaceUrl-->" alt="图片预览" style="max-width: 100px; height: auto; display: inline-block;" />
                 </a>
+                <!-- 如果是图片文件，提供预览链接 -->
+                <a href="<!--FileEncodeReplaceUrl-->" target="_blank">预览</a>
             </td>
             <td align="right"><!--lastModifiedDateTime--></td>
             <td align="right"><!--size--></td>
