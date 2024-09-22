@@ -1,9 +1,11 @@
 <html>
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=5.0, maximum-scale=1.0, shrink-to-fit=no">
+
 <head>
-    <meta name="robots" content="noindex">
-    <meta name="viewport" content="width=device-width, initial-scale=5.0, maximum-scale=1.0, shrink-to-fit=no">
     <title><!--Sitename--> - /<!--PathArrayStart--><!--PathArrayName-->/<!--PathArrayEnd--></title>
 </head>
+
 <body>
     <h1><!--Sitename--> - /<!--DiskPathArrayStart--><!--PathArrayName-->/<!--DiskPathArrayEnd--></h1>
     <hr>
@@ -12,18 +14,33 @@
         <tr>
             <td colspan="3"><a href="<!--BackArrowUrl-->">../</a></td>
         </tr>
-        <!--BackArrowEnd--><!--ListStart--><!--IsFolderStart--><!--FolderListStart-->
+        <!--BackArrowEnd-->
+        <!--ListStart-->
+        <!--IsFolderStart-->
+        <!--FolderListStart-->
         <tr>
             <td><a href="<!--FileEncodeReplaceUrl-->/"><!--FileEncodeReplaceName-->/</a></td>
             <td align="right"><!--lastModifiedDateTime--></td>
             <td align="right">-</td>
-        </tr><!--FolderListEnd--><!--FileListStart-->
+        </tr>
+        <!--FolderListEnd-->
+        <!--FileListStart-->
         <tr>
-            <td><a href="javascript:void(0);" onclick="window.open('<!--FileEncodeReplaceUrl-->', '_blank');"><!--FileEncodeReplaceName--></a></td>
+            <td>
+                <a href="<!--FileEncodeReplaceUrl-->" target="_blank">
+                    <!--FileEncodeReplaceName-->
+                    <!-- 如果文件是图片，显示缩略图 -->
+                    <img src="<!--FileEncodeReplaceUrl-->" alt="图片预览" style="max-width: 100px; height: auto; display: inline-block;" />
+                </a>
+            </td>
             <td align="right"><!--lastModifiedDateTime--></td>
             <td align="right"><!--size--></td>
-        </tr><!--FileListEnd--><!--IsFolderEnd--><!--ListEnd-->
+        </tr>
+        <!--FileListEnd-->
+        <!--IsFolderEnd-->
+        <!--ListEnd-->
     </table>
     <hr>
 </body>
+
 </html>
