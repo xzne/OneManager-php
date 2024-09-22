@@ -7,52 +7,57 @@
     <script>
       function showImage(url) {
         var ext = url.split('.').pop().toLowerCase();
-        if (['jpg', 'jpeg', 'png', 'gif', 'bmp'].includes(ext)) {
+        var imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
+        
+        if (imageTypes.includes(ext)) {
           var w = window.open("", "_blank");
-          w.document.write("<html><head><title>Image Preview</title></head><body style='margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background-color:#000;'><img src='" + url + "' style='max-width:100%;max-height:100%;'/><button onclick='window.close()' style='position:absolute;top:10px;right:10px;color:white;background:black;border:none;padding:10px;'>Close</button></body></html>");
+          w.document.write("<html><head><title>Image Preview</title></head><body style='margin:0;display:flex;justify-content:center;align-items:center;height:100vh;background-color:#000;'><img src='" + url + "' style='max-width:100%;max-height:100%;' /></body></html>");
           w.document.close();
-          return false;
+          return false; // 阻止默认行为
         } else {
-          return true;
+          return true; // 允许默认行为
         }
       }
     </script>
     <style>
       @media (prefers-color-scheme: dark) {
         body {
-          background-color: #121212;
+            background-color: #121212;
         }
         td {
-          color: #f0f0f0;
+            color: #f0f0f0;
         }
         h1 {
-          color: #f0f0f0;
+            color: #f0f0f0;
         }
         a {
-          color: #9f9fff !important;
+            color: #9f9fff !important;
         }
       }
     </style>
 </head>
 
 <body>
-    <H1><!--Sitename--> - /<!--DiskPathArrayStart--><!--PathArrayName-->/<!--DiskPathArrayEnd--></H1>
+    <h1><!--Sitename--> - /<!--DiskPathArrayStart--><!--PathArrayName-->/<!--DiskPathArrayEnd--></h1>
     <hr>
-    <table><!--BackArrowStart-->
+    <table>
+        <!--BackArrowStart-->
         <tr>
-            <td colspan="3"><A HREF="<!--BackArrowUrl-->">../</A></td>
+            <td colspan="3"><a href="<!--BackArrowUrl-->">../</a></td>
         </tr>
         <!--BackArrowEnd--><!--ListStart--><!--IsFolderStart--><!--FolderListStart-->
         <tr>
-            <td><A HREF="<!--FileEncodeReplaceUrl-->/"><!--FileEncodeReplaceName-->/</A></td>
+            <td><a href="<!--FileEncodeReplaceUrl-->/"> <!--FileEncodeReplaceName--> /</a></td>
             <td align="right"><!--lastModifiedDateTime--></td>
             <td align="right">-</td>
-        </tr><!--FolderListEnd--><!--FileListStart-->
+        </tr>
+        <!--FolderListEnd--><!--FileListStart-->
         <tr>
-            <td><A HREF="<!--FileEncodeReplaceUrl-->" onclick="return showImage(this.href);"><!--FileEncodeReplaceName--></A></td>
+            <td><a href="<!--FileEncodeReplaceUrl-->" onclick="return showImage(this.href);"><!--FileEncodeReplaceName--></a></td>
             <td align="right"><!--lastModifiedDateTime--></td>
             <td align="right"><!--size--></td>
-        </tr><!--FileListEnd--><!--IsFolderEnd--><!--ListEnd-->
+        </tr>
+        <!--FileListEnd--><!--IsFolderEnd--><!--ListEnd-->
     </table>
     <hr>
 </body>
