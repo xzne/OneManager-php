@@ -6,12 +6,17 @@
     <title><!--Sitename--> - /<!--PathArrayStart--><!--PathArrayName-->/<!--PathArrayEnd--></title>
     <script>
       function showImage(url) {
-        var img = new Image();
-        img.src = url;
-        var w = window.open("", "_blank");
-        w.document.write("<html><body><img src='" + url + "' /></body></html>");
-        w.document.close();
-        return false;
+        var ext = url.split('.').pop().toLowerCase();
+        if (ext == 'jpg' || ext == 'jpeg' || ext == 'png' || ext == 'gif' || ext == 'bmp') {
+          var img = new Image();
+          img.src = url;
+          var w = window.open("", "_blank");
+          w.document.write("<html><body><img src='" + url + "' /></body></html>");
+          w.document.close();
+          return false;
+        } else {
+          return true;
+        }
       }
     </script>
 </head>
