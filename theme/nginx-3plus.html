@@ -10,7 +10,14 @@
         var imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
 
         if (imageTypes.includes(ext)) {
-          window.location.href = url + '?preview'; // 改变当前页面地址
+          document.body.innerHTML = ''; // 清空当前页面内容
+          var img = document.createElement('img');
+          img.src = url + '?preview';
+          img.style.maxWidth = '100%';
+          img.style.maxHeight = '100vh';
+          img.style.display = 'block';
+          img.style.margin = 'auto';
+          document.body.appendChild(img);
           return false; // 阻止默认行为
         } else {
           return true; // 允许默认行为
