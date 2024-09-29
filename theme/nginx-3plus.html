@@ -1,6 +1,6 @@
 <html>
 <meta name="robots" content="noindex">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, shrink-to-fit=no">
+<meta name="viewport" content="width=device-width, initial-scale=5.0, maximum-scale=1.0, shrink-to-fit=no">
 
 <head>
     <title><!--Sitename--> - /<!--PathArrayStart--><!--PathArrayName-->/<!--PathArrayEnd--></title>
@@ -8,70 +8,48 @@
       function showImage(url) {
         var ext = url.split('.').pop().toLowerCase();
         var imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
-
+        
         if (imageTypes.includes(ext)) {
-          // 修改地址为文件链接?preview
-          history.pushState({ imageUrl: url }, '', url + '?preview');
-
-          // 重写页面内容
-          document.body.innerHTML = `
-            <div style="margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh;">
-              <img src='${url}' style="max-width: 100%; max-height: 100%; cursor: zoom-in;" onclick="zoomImage(this);" />
-            </div>
-          `;
+          var w = window.open("", "_blank");
+          w.document.write(`
+            <html>
+              <head>
+                <title>img</title>
+                <style>
+                  body {
+                    margin: 0;
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    height: 100vh;
+                  }
+                  @media (prefers-color-scheme: dark) {
+                    body {
+                      background-color: #000;
+                    }
+                  }
+                  @media (prefers-color-scheme: light) {
+                    body {
+                      background-color: #fff;
+                    }
+                  }
+                  img {
+                    max-width: 100%;
+                    max-height: 100%;
+                  }
+                </style>
+              </head>
+              <body>
+                <img src='${url}' />
+              </body>
+            </html>
+          `);
+          w.document.close();
           return false; // 阻止默认行为
         } else {
           return true; // 允许默认行为
         }
       }
-
-      function zoomImage(img) {
-        const fullImageUrl = img.src;
-        const zoomedImg = document.createElement('img');
-        zoomedImg.src = fullImageUrl;
-        zoomedImg.style.width = 'auto';
-        zoomedImg.style.height = 'auto';
-        zoomedImg.style.maxWidth = '90%';
-        zoomedImg.style.maxHeight = '90%';
-        zoomedImg.style.position = 'fixed';
-        zoomedImg.style.top = '50%';
-        zoomedImg.style.left = '50%';
-        zoomedImg.style.transform = 'translate(-50%, -50%)';
-        zoomedImg.style.zIndex = '1000';
-        zoomedImg.onclick = function() {
-          document.body.removeChild(zoomedImg);
-        };
-        document.body.appendChild(zoomedImg);
-      }
-
-      window.onpopstate = function(event) {
-        if (event.state) {
-          document.body.innerHTML = `
-            <h1><!--Sitename--> - /<!--DiskPathArrayStart--><!--PathArrayName-->/<!--DiskPathArrayEnd--></h1>
-            <hr>
-            <table>
-                <!--BackArrowStart-->
-                <tr>
-                    <td colspan="3"><a href="<!--BackArrowUrl-->">../</a></td>
-                </tr>
-                <!--BackArrowEnd--><!--ListStart--><!--IsFolderStart--><!--FolderListStart-->
-                <tr>
-                    <td><a href="<!--FileEncodeReplaceUrl-->/"> <!--FileEncodeReplaceName--> /</a></td>
-                    <td align="right"><!--lastModifiedDateTime--></td>
-                    <td align="right">-</td>
-                </tr>
-                <!--FolderListEnd--><!--FileListStart-->
-                <tr>
-                    <td><a href="<!--FileEncodeReplaceUrl-->" onclick="return showImage(this.href);"><!--FileEncodeReplaceName--></a></td>
-                    <td align="right"><!--lastModifiedDateTime--></td>
-                    <td align="right"><!--size--></td>
-                </tr>
-                <!--FileListEnd--><!--IsFolderEnd--><!--ListEnd-->
-            </table>
-            <hr>
-          `;
-        }
-      };
     </script>
     <style>
       @media (prefers-color-scheme: dark) {
