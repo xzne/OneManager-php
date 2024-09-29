@@ -10,42 +10,47 @@
         var imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
         
         if (imageTypes.includes(ext)) {
+          // 构造新的预览链接
           var previewUrl = url + '?preview';
           var w = window.open(previewUrl, "_blank");
-          w.document.write(`
-            <html>
-              <head>
-                <title>img</title>
-                <style>
-                  body {
-                    margin: 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                  }
-                  @media (prefers-color-scheme: dark) {
+          
+          // 等待新窗口加载后再写入内容
+          w.onload = function() {
+            w.document.write(`
+              <html>
+                <head>
+                  <title>img</title>
+                  <style>
                     body {
-                      background-color: #000;
+                      margin: 0;
+                      display: flex;
+                      justify-content: center;
+                      align-items: center;
+                      height: 100vh;
                     }
-                  }
-                  @media (prefers-color-scheme: light) {
-                    body {
-                      background-color: #fff;
+                    @media (prefers-color-scheme: dark) {
+                      body {
+                        background-color: #000;
+                      }
                     }
-                  }
-                  img {
-                    max-width: 100%;
-                    max-height: 100%;
-                  }
-                </style>
-              </head>
-              <body>
-                <img src='${url}' />
-              </body>
-            </html>
-          `);
-          w.document.close();
+                    @media (prefers-color-scheme: light) {
+                      body {
+                        background-color: #fff;
+                      }
+                    }
+                    img {
+                      max-width: 100%;
+                      max-height: 100%;
+                    }
+                  </style>
+                </head>
+                <body>
+                  <img src='${url}' />
+                </body>
+              </html>
+            `);
+            w.document.close();
+          };
           return false; // 阻止默认行为
         } else {
           return true; // 允许默认行为
