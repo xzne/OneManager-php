@@ -67,39 +67,19 @@ async function fetchAndApply(host, request) {
         });
     }
 
-let out_headers = new Headers(response.headers);
-if (out_headers.get('Content-Disposition') === 'attachment') {
-    out_headers.delete('Content-Disposition');
-}
-
-let out_body = null;
-let contentType = out_headers.get('Content-Type');
-
-try {
-    if (contentType.includes("application/text") || contentType.includes("text/plain")) {
+    let out_headers = new Headers(response.headers);
+    if (out_headers.get('Content-Disposition')=='attachment') out_headers.delete('Content-Disposition');
+    let out_body = null;
+    let contentType = out_headers.get('Content-Type');
+    if (contentType.includes("application/text")) {
         out_body = await response.text();
-        while (out_body.includes(replace_path)) {
-            out_body = out_body.replace(replace_path, replaced_path);
-        }
+        while (out_body.includes(replace_path)) out_body = out_body.replace(replace_path, replaced_path);
     } else if (contentType.includes("text/html")) {
         out_body = await response.text();
-        while (replace_path !== '/' && out_body.includes(replace_path)) {
-            out_body = out_body.replace(replace_path, replaced_path);
-        }
-    } else if (contentType.includes("image/") || contentType.includes("application/pdf")) {
-        // 处理图像或PDF文件
-        const blob = await response.blob();
-        const url = URL.createObjectURL(blob);
-        // 这里可以在页面上创建一个预览
-        const img = document.createElement('img');
-        img.src = url;
-        document.body.appendChild(img);
+        while (replace_path!='/'&&out_body.includes(replace_path)) out_body = out_body.replace(replace_path, replaced_path);
     } else {
-        out_body = await response.body; // 或者您可以选择处理其他类型
+        out_body = await response.body;
     }
-} catch (error) {
-    console.error('Error processing response:', error);
-}
 
 
     let out_response = new Response(out_body, {
