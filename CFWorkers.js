@@ -81,7 +81,6 @@ async function fetchAndApply(host, request) {
         out_body = await response.body;
     }
 
-
     let out_response = new Response(out_body, {
         status: response.status,
         headers: out_headers
