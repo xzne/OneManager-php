@@ -10,43 +10,7 @@
         var imageTypes = ['jpg', 'jpeg', 'png', 'gif', 'bmp'];
 
         if (imageTypes.includes(ext)) {
-          // 修改地址为文件链接?preview
-          history.pushState(null, '', url + '?preview');
-
-          // 重写页面内容
-          document.body.innerHTML = `
-            <html>
-              <head>
-                <title>img</title>
-                <style>
-                  body {
-                    margin: 0;
-                    display: flex;
-                    justify-content: center;
-                    align-items: center;
-                    height: 100vh;
-                  }
-                  @media (prefers-color-scheme: dark) {
-                    body {
-                      background-color: #000;
-                    }
-                  }
-                  @media (prefers-color-scheme: light) {
-                    body {
-                      background-color: #fff;
-                    }
-                  }
-                  img {
-                    max-width: 100%;
-                    max-height: 100%;
-                  }
-                </style>
-              </head>
-              <body>
-                <img src='${url}' />
-              </body>
-            </html>
-          `;
+          window.location.href = url + '?preview'; // 改变当前页面地址
           return false; // 阻止默认行为
         } else {
           return true; // 允许默认行为
